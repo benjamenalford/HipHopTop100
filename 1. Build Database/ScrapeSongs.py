@@ -18,8 +18,6 @@ soup = BeautifulSoup(response.text, 'html.parser')
 
 results = soup.find_all('div', class_="list-item")
 
-albumList = []
-
 for result in results:
     artist = ""
     album = ""
@@ -44,19 +42,15 @@ for result in results:
         'albumTitle': album.strip(),
         'year': year.strip()
     }
-    albumList.append(albumInfo)
-    artist = ""
-    album = ""
-    year = ""
 
-for album in albumList:
-    wikiUrl = baseurl + album["artist"]
+    # get wikipedia info
+    wikiUrl = baseurl + artist
     response = requests.get(wikiUrl)
     soup = BeautifulSoup(response.text, 'html.parser')
     results = soup.find_all('table', class_="infobox vcard plainlist")
     for result in results:
-        x = result.find_all('tr')
-        for row in x:
+        i = result.find_all('tr')
+        for row in i:
             try:
                 if row.th.text == "Origin":
                     locations = row.td.text.split(',')
@@ -64,10 +58,10 @@ for album in albumList:
                         if (location.strip() == "US" or location.strip() == "United States" or location.strip() == "U.S."):
                             locations.remove(location)
 
-                    album["origin"] = locations
+                    albumInfo["origin"] = locations
 
             except:
-                2+2
+                2 + 2
 
-
-collection.insert(albumList)
+    # insert to db
+    collection.insert(albumInfo)
