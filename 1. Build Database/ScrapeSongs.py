@@ -6,7 +6,7 @@ import pymongo
 # setup the database
 conn = 'mongodb://localhost:27017'
 client = pymongo.MongoClient(conn)
-db = client.HipHip100
+db = client.HipHop100
 collection = db.albums
 
 # grab the
@@ -40,9 +40,9 @@ for result in results:
             2+2
 
     albumInfo = {
-        'artist': artist,
-        'albumTitle': album,
-        'year': year
+        'artist': artist.strip(),
+        'albumTitle': album.strip(),
+        'year': year.strip()
     }
     albumList.append(albumInfo)
     artist = ""
@@ -59,7 +59,13 @@ for album in albumList:
         for row in x:
             try:
                 if row.th.text == "Origin":
-                    album["origin"] = row.td.text.split(',')
+                    locations = row.td.text.split(',')
+                    for location in locations:
+                        if (location.strip() == "US" or location.strip() == "United States" or location.strip() == "U.S."):
+                            locations.remove(location)
+
+                    album["origin"] = locations
+
             except:
                 2+2
 
