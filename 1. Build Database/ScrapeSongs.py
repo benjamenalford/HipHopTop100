@@ -1,0 +1,67 @@
+# -*- coding: utf-8 -*-
+from bs4 import BeautifulSoup
+import requests
+import pymongo
+
+# setup the database
+conn = 'mongodb://localhost:27017'
+client = pymongo.MongoClient(conn)
+db = client.HipHip100
+collection = db.albums
+
+# grab the
+url = 'https://hiphopgoldenage.com/list/100-essential-hip-hop-albums/'
+baseurl = 'https://en.wikipedia.org/wiki/'
+
+response = requests.get(url)
+soup = BeautifulSoup(response.text, 'html.parser')
+
+results = soup.find_all('div', class_="list-item")
+
+albumList = []
+
+for result in results:
+    artist = ""
+    album = ""
+    year = ""
+
+    try:
+        resultText = result.h3.text.replace(unicode("–", "utf-8"), "-")
+        artistAlbum = resultText.split(" - ")
+        artist = artistAlbum[0]
+        album = artistAlbum[1][:-6]
+        year = artistAlbum[1][-6:].replace('(', '').replace(')', '')
+    except:
+        try:
+            artist = "various"
+            album = result.h3.text[:-6]
+            year = result.h3.text[-6:].replace('(', '').replace(')', '')
+        except:
+            2+2
+
+    albumInfo = {
+        'artist': artist,
+        'albumTitle': album,
+        'year': year
+    }
+    albumList.append(albumInfo)
+    artist = ""
+    album = ""
+    year = ""
+
+for album in albumList:
+    wikiUrl = baseurl + album["artist"]
+    response = requests.get(wikiUrl)
+    soup = BeautifulSoup(response.text, 'html.parser')
+    results = soup.find_all('table', class_="infobox vcard plainlist")
+    for result in results:
+        x = result.find_all('tr')
+        for row in x:
+            try:
+                if row.th.text == "Origin":
+                    album["origin"] = row.td.text.split(',')
+            except:
+                2+2
+
+
+collection.insert(albumList)
