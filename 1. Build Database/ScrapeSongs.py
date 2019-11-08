@@ -9,7 +9,24 @@ client = pymongo.MongoClient(conn)
 db = client.HipHop100
 collection = db.albums
 
-# grab the
+# set up a quick help function
+
+
+def getLatLong(url):
+    response = requests.get("https://en.wikipedia.org/" + url)
+    soup = BeautifulSoup(response.text, 'html.parser')
+    latitude = soup.find_all('span', class_="latitude")
+    longitude = soup.find_all('span', class_="longitude")
+    coordinates = []
+    try:
+        coordinates.append(latitude[0].text[:-1])
+        coordinates.append(longitude[0].text[:-1])
+    except Exception as e:
+        print(e)
+    return coordinates
+
+
+# grab the article
 url = 'https://hiphopgoldenage.com/list/100-essential-hip-hop-albums/'
 baseurl = 'https://en.wikipedia.org/wiki/'
 
@@ -34,8 +51,8 @@ for result in results:
             artist = "various"
             album = result.h3.text[:-6]
             year = result.h3.text[-6:].replace('(', '').replace(')', '')
-        except:
-            2+2
+        except Exception as e:
+            print(e)
 
     albumInfo = {
         'artist': artist.strip(),
@@ -58,10 +75,10 @@ for result in results:
                         if (location.strip() == "US" or location.strip() == "United States" or location.strip() == "U.S."):
                             locations.remove(location)
 
+                    albumInfo["coordinates"] = getLatLong(row.td.a["href"])
                     albumInfo["origin"] = locations
-
-            except:
-                2 + 2
+            except Exception as e:
+                print(e)
 
     # insert to db
     collection.insert(albumInfo)
