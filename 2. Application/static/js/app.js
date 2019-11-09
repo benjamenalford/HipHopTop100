@@ -15,4 +15,5 @@ d3.json("/api/albumData").then(data => {
         r.append("td").text(row.albumTitle);
         r.append("td").text(row.year);
     })
-});
+
+})
