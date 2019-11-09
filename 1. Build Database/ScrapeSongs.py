@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from bs4 import BeautifulSoup
+from decimal import Decimal
 import requests
 import pymongo
 
@@ -9,7 +10,7 @@ client = pymongo.MongoClient(conn)
 db = client.HipHop100
 collection = db.albums
 
-# set up a quick help function
+# set up a quick helper function
 
 
 def getLatLong(url):
@@ -19,11 +20,28 @@ def getLatLong(url):
     longitude = soup.find_all('span', class_="longitude")
     coordinates = []
     try:
-        coordinates.append(latitude[0].text[:-1])
-        coordinates.append(longitude[0].text[:-1])
+        coordinates.append(convertCoordinate(latitude[0].text[:-1]))
+        coordinates.append(convertCoordinate(longitude[0].text[:-1]))
     except Exception as e:
         print(e)
+
     return coordinates
+
+
+def convertCoordinate(coordinate):
+    #     To calculate decimal degrees, we use the DMS to decimal degree formula below:
+    # Decimal Degrees = degrees + (minutes/60) + (seconds/3600)
+    # DD = d + (min/60) + (sec/3600)
+    degrees = coordinate.split(unicode("°", "utf-8"))
+    minutes = coordinate.split(
+        unicode("°", "utf-8"))[1].split(unicode("′", "utf-8"))
+    seconds = coordinate.split(
+        unicode("°", "utf-8"))[1].split(unicode("′", "utf-8"))
+
+    newCoordinate = float(
+        degrees[0]) + (float(minutes[0]) / 60) + (float(seconds[1][:-1]) / 3600)
+
+    return newCoordinate
 
 
 # grab the article
