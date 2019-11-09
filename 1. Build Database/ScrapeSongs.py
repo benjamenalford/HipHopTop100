@@ -29,7 +29,7 @@ def getLatLong(url):
 
 
 def convertCoordinate(coordinate):
-    #     To calculate decimal degrees, we use the DMS to decimal degree formula below:
+    # To calculate decimal degrees, we use the DMS to decimal degree formula below:
     # Decimal Degrees = degrees + (minutes/60) + (seconds/3600)
     # DD = d + (min/60) + (sec/3600)
     degrees = coordinate.split(unicode("°", "utf-8"))
