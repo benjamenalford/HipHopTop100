@@ -13,15 +13,24 @@ d3.json("/api/albumData").then(data => {
     // display a table
     var tableview = d3.select("#tableView");
     var table = tableview.append("table").classed("table", true);
-    var header = table.append("tr")
-    header.append("th").text("artist")
-    header.append("th").text("album")
-    header.append("th").text("year")
+    var header = table.append("tr");
+    header.append("th").text("artist");
+    header.append("th").text("album");
+    header.append("th").text("year");
     data.forEach(row => {
         var r = table.append("tr");
         r.append("td").text(row.artist);
         r.append("td").text(row.albumTitle);
         r.append("td").text(row.year);
+    })
+
+    // place markers for albums
+    data.forEach(row => {
+        if (row.coordinates && row.coordinates.length > 0) {
+            lat = row.coordinates[0];
+            long = 0 - row.coordinates[1];
+            L.marker([lat, long]).addTo(myMap);
+        }
     })
 
 })
