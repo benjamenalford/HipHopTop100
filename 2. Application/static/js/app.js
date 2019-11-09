@@ -29,7 +29,8 @@ d3.json("/api/albumData").then(data => {
         if (row.coordinates && row.coordinates.length > 0) {
             lat = row.coordinates[0];
             long = 0 - row.coordinates[1];
-            L.marker([lat, long]).addTo(myMap);
+            marker = L.marker([lat, long]).addTo(myMap);
+            marker.bindPopup(`<h3>${row.artist}</h3><h4>${row.albumTitle}</h4>`);
         }
     })
 
