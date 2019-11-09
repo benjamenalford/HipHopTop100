@@ -3,3 +3,8 @@
     width: 500px;
     height: 500px;
 }
+
+#menu {
+    position: fixed;
+    z-index: 9999999;
+}
