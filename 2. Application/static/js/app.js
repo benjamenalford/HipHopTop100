@@ -1,4 +1,12 @@
 //
+var myMap = L.map("map").setView([38.9822, -94.6708], 3);
+//38.9822° N, 94.6708° W
+L.tileLayer("https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}", {
+    maxZoom: 5,
+    id: "mapbox.pencil",
+    accessToken: MAP_BOX_API_KEY
+}).addTo(myMap);
+
 d3.json("/api/albumData").then(data => {
     console.log(data);
 
