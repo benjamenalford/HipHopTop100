@@ -32,6 +32,21 @@ d3.json("/api/albumData").then(data => {
             marker = L.marker([lat, long]).addTo(myMap);
             marker.bindPopup(`<h3>${row.artist}</h3><h4>${row.albumTitle}</h4>`);
         }
-    })
+    });
+
+    // Plot some data
+    var trace1 = {
+        x: data.map(r => r.year),
+        y: data.map(r => r.year),
+        type: "bar"
+    };
+
+    var data = [trace1];
+
+    var layout = {
+        title: "Releases By Year"
+    };
+
+    Plotly.newPlot("plot", data, layout);
 
 })

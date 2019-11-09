@@ -23,6 +23,11 @@ def index():
     return render_template("index.html")
 
 
+@app.route('/credits')
+def credits():
+    return render_template("credits.html")
+
+
 @app.route('/api/albumData')
 def albumData():
     albums = list(db.albums.find())
