@@ -9,7 +9,7 @@ var vinylIcon = L.icon({
 
 L.tileLayer("https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}", {
     maxZoom: 11,
-    id: "mapbox.pencil",
+    id: "mapbox.light",
     accessToken: MAP_BOX_API_KEY
 }).addTo(myMap);
 
