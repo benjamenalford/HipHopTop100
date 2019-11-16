@@ -8,8 +8,9 @@ import pymongo
 conn = 'mongodb://localhost:27017'
 client = pymongo.MongoClient(conn)
 db = client.HipHop100
-collection = db.albums
 
+collection = db.albums
+collection.drop()
 # set up a quick helper function
 
 
@@ -20,8 +21,9 @@ def getLatLong(url):
     longitude = soup.find_all('span', class_="longitude")
     coordinates = []
     try:
-        coordinates.append(convertCoordinate(latitude[0].text[:-1]))
-        coordinates.append(convertCoordinate(longitude[0].text[:-1]))
+        if latitude.__len__() > 0 and longitude.__len__() > 0:
+            coordinates.append(convertCoordinate(latitude[0].text[:-1]))
+            coordinates.append(convertCoordinate(longitude[0].text[:-1]))
     except Exception as e:
         print(e)
 
@@ -38,8 +40,20 @@ def convertCoordinate(coordinate):
     seconds = coordinate.split(
         unicode("°", "utf-8"))[1].split(unicode("′", "utf-8"))
 
-    newCoordinate = float(
-        degrees[0]) + (float(minutes[0]) / 60) + (float(seconds[1][:-1]) / 3600)
+    degrees = degrees[0] if degrees[0] else 0
+    minutes = minutes[0] if minutes[0] else 0
+
+   # if seconds[1] and seconds[1][:-1] < .01:
+    seconds = 0
+   # else:
+    #    seconds = seconds[1][:-1]
+
+    newCoordinate = float(0)
+    try:
+        newCoordinate = float(degrees) + (float(minutes) /
+                                          60) + (float(seconds) / 3600)
+    except Exception as e:
+        print(e)
 
     return newCoordinate
 
@@ -57,46 +71,72 @@ for result in results:
     artist = ""
     album = ""
     year = ""
-
-    try:
-        resultText = result.h3.text.replace(unicode("–", "utf-8"), "-")
-        artistAlbum = resultText.split(" - ")
-        artist = artistAlbum[0]
-        album = artistAlbum[1][:-6]
-        year = artistAlbum[1][-6:].replace('(', '').replace(')', '')
-    except:
+    if result.h3:
         try:
-            artist = "various"
-            album = result.h3.text[:-6]
-            year = result.h3.text[-6:].replace('(', '').replace(')', '')
-        except Exception as e:
-            print(e)
-
-    albumInfo = {
-        'artist': artist.strip(),
-        'albumTitle': album.strip(),
-        'year': year.strip()
-    }
-
-    # get wikipedia info
-    wikiUrl = baseurl + artist
-    response = requests.get(wikiUrl)
-    soup = BeautifulSoup(response.text, 'html.parser')
-    results = soup.find_all('table', class_="infobox vcard plainlist")
-    for result in results:
-        i = result.find_all('tr')
-        for row in i:
+            resultText = result.h3.text.replace(unicode("–", "utf-8"), "-")
+            artistAlbum = resultText.split(" - ")
+            artist = artistAlbum[0]
+            album = artistAlbum[1][:-6]
+            year = artistAlbum[1][-6:].replace('(', '').replace(')', '')
+        except:
             try:
-                if row.th.text == "Origin":
-                    locations = row.td.text.split(',')
-                    for location in locations:
-                        if (location.strip() == "US" or location.strip() == "United States" or location.strip() == "U.S."):
-                            locations.remove(location)
-
-                    albumInfo["coordinates"] = getLatLong(row.td.a["href"])
-                    albumInfo["origin"] = locations
+                artist = "various"
+                album = result.h3.text[:-6]
+                year = result.h3.text[-6:].replace('(', '').replace(')', '')
             except Exception as e:
                 print(e)
 
-    # insert to db
-    collection.insert(albumInfo)
+        albumInfo = {
+            'artist': artist.strip(),
+            'albumTitle': album.strip(),
+            'year': year.strip()
+        }
+
+        # get wikipedia info
+        wikiUrl = baseurl + artist
+        response = requests.get(wikiUrl)
+        soup = BeautifulSoup(response.text, 'html.parser')
+        results = soup.find_all('table', class_="infobox vcard plainlist")
+        bioResults = soup.find_all('div', class_="birthplace")
+
+        # if the initial wiki page doesn't work try the alternate(s)
+        if results.__len__() < 1 and bioResults.__len__() < 1:
+            wikiUrl = baseurl + artist + "_(band)"
+            response = requests.get(wikiUrl)
+            soup = BeautifulSoup(response.text, 'html.parser')
+            results = soup.find_all('table', class_="infobox vcard plainlist")
+            bioResults = soup.find_all('div', class_="birthplace")
+
+        if results.__len__() < 1 and bioResults.__len__() < 1:
+            wikiUrl = baseurl + artist + "_(rapper)"
+            response = requests.get(wikiUrl)
+            soup = BeautifulSoup(response.text, 'html.parser')
+            results = soup.find_all('table', class_="infobox vcard plainlist")
+            bioResults = soup.find_all('div', class_="birthplace")
+
+        albumInfo["wikiUrl"] = wikiUrl
+
+        if bioResults.__len__() > 0:
+            albumInfo["coordinates"] = getLatLong(bioResults[0].a["href"])
+        else:
+            for result in results:
+                i = result.find_all('tr')
+                for row in i:
+                    try:
+                        if row.th and (row.th.text == "Origin" or row.th.text == "Born"):
+                            locations = row.td.text.split(',')
+                            for location in locations:
+                                if (location.strip() == "US" or location.strip() == "United States" or location.strip() == "U.S."):
+                                    locations.remove(location)
+
+                            if row.td.a:
+                                coordinates = getLatLong(row.td.a["href"])
+                            else:
+                                coordinates = []
+                            albumInfo["coordinates"] = coordinates
+                            albumInfo["origin"] = locations
+                    except Exception as e:
+                        print(e)
+
+        # insert to db
+        collection.insert(albumInfo)
