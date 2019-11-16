@@ -1,11 +1,18 @@
 //
 var myMap = L.map("map").setView([38.9822, -94.6708], 3);
-//38.9822° N, 94.6708° W
+
+var vinylIcon = L.icon({
+    iconUrl: '../static/images/vinyl.png',
+    iconSize: [20, 20],
+    iconAnchor: [10, 10]
+});
+
 L.tileLayer("https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}", {
-    maxZoom: 5,
+    maxZoom: 11,
     id: "mapbox.pencil",
     accessToken: MAP_BOX_API_KEY
 }).addTo(myMap);
+
 
 d3.json("/api/albumData").then(data => {
     console.log(data);
@@ -29,8 +36,12 @@ d3.json("/api/albumData").then(data => {
         if (row.coordinates && row.coordinates.length > 0) {
             lat = row.coordinates[0];
             long = 0 - row.coordinates[1];
-            marker = L.marker([lat, long]).addTo(myMap);
-            marker.bindPopup(`<h3>${row.artist}</h3><h4>${row.albumTitle}</h4>`);
+            marker = L.marker([lat, long], { icon: vinylIcon }).addTo(myMap);
+            origin = ""
+            if (row.origin) {
+                origin = row.origin[0];
+            }
+            marker.bindPopup(`<h3>${row.artist}</h3><h4>${row.albumTitle}</h4><p>${origin}</p>`);
         }
     });
 
