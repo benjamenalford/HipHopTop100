@@ -17,6 +17,22 @@ L.tileLayer("https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={
 d3.json("/api/albumData").then(data => {
     console.log(data);
 
+    // place markers for albums
+    data.forEach(row => {
+
+        if (row.coordinates && row.coordinates.length > 0) {
+            row.mapped = true;
+            lat = row.coordinates[0].toFixed(2);;
+            long = 0 - row.coordinates[1].toFixed(2);;
+            marker = L.marker([lat, long], { icon: vinylIcon }).addTo(myMap);
+            origin = ""
+            if (row.origin) {
+                origin = row.origin[0];
+            }
+            marker.bindPopup(`<h3>${row.artist}</h3><h4>${row.albumTitle}</h4><p>${origin}</p>`);
+        }
+    });
+
     // display a table
     var tableView = d3.select("#dataTable");
 
@@ -27,21 +43,8 @@ d3.json("/api/albumData").then(data => {
         r.append("td").text(row.albumTitle);
         r.append("td").text(row.origin);
         r.append("td").text(row.coordinates);
-        r.append("td").text(row.wikiUrl);
-    })
-
-    // place markers for albums
-    data.forEach(row => {
-        if (row.coordinates && row.coordinates.length > 0) {
-            lat = row.coordinates[0];
-            long = 0 - row.coordinates[1];
-            marker = L.marker([lat, long], { icon: vinylIcon }).addTo(myMap);
-            origin = ""
-            if (row.origin) {
-                origin = row.origin[0];
-            }
-            marker.bindPopup(`<h3>${row.artist}</h3><h4>${row.albumTitle}</h4><p>${origin}</p>`);
-        }
+        r.append("td").append("a").attr("href", row.wikiUrl).attr("target", "_blank").text("Info")
+        r.append("td").text(row.mapped);
     });
 
     // Plot some data

@@ -22,8 +22,10 @@ def getLatLong(url):
     coordinates = []
     try:
         if latitude.__len__() > 0 and longitude.__len__() > 0:
-            coordinates.append(convertCoordinate(latitude[0].text[:-1]))
-            coordinates.append(convertCoordinate(longitude[0].text[:-1]))
+            coordinates.append(
+                round(convertCoordinate(latitude[0].text[:-1]), 2))
+            coordinates.append(
+                round(convertCoordinate(longitude[0].text[:-1]), 2))
     except Exception as e:
         print(e)
 
