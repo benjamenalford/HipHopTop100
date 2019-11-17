@@ -22,8 +22,9 @@
     <!-- boot strap  -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <!-- data tables -->
-    <link href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css">
     <script src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css" />
+
     <!-- custom styles -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 
@@ -97,9 +98,17 @@
     </div>
     <div id="tableView">
         <h3>Raw Data</h3>
-    </div>
+        <table id="dataTable" class="table">
+            <thead>
 
-    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+            </thead>
+            <tbody>
+
+            </tbody>
+        </table>
+    </div>
+    <script src="{{ url_for('static', filename='js/app.js') }}">
+    </script>
 </body>
 
 
