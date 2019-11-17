@@ -20,15 +20,14 @@ d3.json("/api/albumData").then(data => {
     // display a table
     var tableView = d3.select("#dataTable");
 
-    var header = tableView.select("thead").append("tr");
-    header.append("th").text("artist");
-    header.append("th").text("album");
-    header.append("th").text("year");
     data.forEach(row => {
         var r = tableView.select("tbody").append("tr");
+        r.append("td").text(row.year);
         r.append("td").text(row.artist);
         r.append("td").text(row.albumTitle);
-        r.append("td").text(row.year);
+        r.append("td").text(row.origin);
+        r.append("td").text(row.coordinates);
+        r.append("td").text(row.wikiUrl);
     })
 
     // place markers for albums
